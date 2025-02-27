@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Build-X | Page Builder</title>
+    <meta
+      content="Best Free Open Source Responsive Websites Builder"
+      name="description"
+    />
+    <link rel="stylesheet" href="{% static 'stylesheets/toastr.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'stylesheets/grapes.min.css' %}" />
+    <link
+      rel="stylesheet"
+      href="{% static 'stylesheets/grapesjs-preset-webpage.min.css' %}"
+    />
+    <link rel="stylesheet" href="{% static 'stylesheets/tooltip.css' %}" />
+    <link rel="stylesheet" href="{% static 'stylesheets/demos.css' %}" />
+    <link
+      href="https://unpkg.com/grapick/dist/grapick.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'js/toastr.min.js' %}"></script>
+    <script src="{% static 'js/grapes.min.js' %}"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.2"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-forms@2.0.5"></script>
+    <script src="https://unpkg.com/grapesjs-component-countdown@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-export@1.0.11"></script>
+    <script src="https://unpkg.com/grapesjs-tabs@1.0.6"></script>
+    <script src="https://unpkg.com/grapesjs-custom-code@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-touch@0.1.1"></script>
+    <script src="https://unpkg.com/grapesjs-parser-postcss@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-tooltip@0.1.7"></script>
+    <script src="https://unpkg.com/grapesjs-tui-image-editor"></script>
+    <script src="https://unpkg.com/grapesjs-typed@1.0.5"></script>
+    <script src="https://unpkg.com/grapesjs-style-bg@2.0.1"></script>
+
+    <!-- Include Bootstrap and Bootstrap Icons (if not already included) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'main/style.css' %}" />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #463a3c; border-bottom: 2px solid #b9a5a6;">
+      <div class="container-fluid">
+        <!-- Home Button -->
+        <a class="navbar-brand text-light fs-6" href="{% url 'webbuilder:list_pages' %}">
+          <i class="bi bi-house-door"></i> My Pages
+        </a>
+
+        <!-- Save Form with Save Button -->
+        <form
+          id="save-form"
+          action="{% if page %}{% url 'webbuilder:save_page' page.id %}{% else %}{% url 'webbuilder:create_page' %}{% endif %}"
+          method="POST"
+          class="d-inline"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="html" id="html" />
+          <input type="hidden" name="css" id="css" />
+          <button
+            type="button"
+            id="save-button"
+            class="btn btn-sm btn-outline-light fs-6"
+          >
+            <i class="bi bi-save"></i> Save
+          </button>
+        </form>
+      </div>
+    </nav>
+
+    <div style="display: none">
+      <div class="gjs-logo-cont">
+        <a href="https://grapesjs.com"
+          ><img class="gjs-logo" src="{% static 'img/grapesjs-logo-cl.png' %}"
+        /></a>
+        <div class="gjs-logo-version"></div>
+      </div>
+    </div>
+    <div class="ad-cont">
+      <!-- <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=grapesjscom" id="_carbonads_js"></script> -->
+      <div id="native-carbon"></div>
+      <script
+        async
+        type="text/javascript"
+        src="{% static 'js/carbon-v2.js' %}"
+      ></script>
+    </div>
+
+    <div id="gjs" style="height: 0px; overflow: hidden">
+      {% if page %} {{ page.html|safe }} {% endif %}
+    </div>
+
+    <div
+      id="info-panel"
+      class="d-flex flex-column align-items-center justify-content-center"
+      style="display: none"
+    >
+      <br />
+      <!-- Centering the image -->
+      <img
+        src="{% static 'img/logos/buildx_logo.png' %}"
+        width="150px"
+        class="mb-3"
+      />
+      <br />
+      <div class="info-panel-label text-justify">
+        <strong>Build-X</strong> is a user-friendly, drag-and-drop website builder that
+        allows anyone to create stunning, professional websites without the need
+        for coding skills. Whether you're a business owner, freelancer, or just
+        starting a personal project, Build-X makes it easy to build responsive,
+        customized websites in no time. <br />
+        <br />
+        With its intuitive interface and a wide range of customizable templates,
+        Build-X empowers users to create fully functional websites with just a
+        few clicks. Every website built is automatically optimized for mobile
+        devices, ensuring your site looks great on any screen.
+      </div>
+    </div>
+
+    <script src="{% static 'main/app.js' %}"></script>
+
+    <script type="text/javascript">
+      document.getElementById("save-button").addEventListener("click", () => {
+        const saveButton = document.getElementById("save-button");
+        saveButton.disabled = true; // Disable the button to prevent multiple clicks
+
+        const formData = new FormData();
+        formData.append("html", editor.getHtml());
+        formData.append("css", editor.getCss());
+
+        const formAction = document.getElementById("save-form").action;
+
+        const csrftoken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
+        const request = new Request(formAction, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrftoken },
+          mode: "same-origin",
+          body: formData,
+        });
+
+        fetch(request)
+          .then((response) =>
+            response.json().then((data) => {
+              if (response.ok) {
+                // Display success toast
+                toastr.success(data.message || "Content saved successfully!");
+              } else {
+                // Display error toast
+                toastr.error(data.error || "Error saving content.");
+              }
+            })
+          )
+          .catch((error) => {
+            console.error(error);
+            toastr.error("Error communicating with the server.");
+          })
+          .finally(() => {
+            saveButton.disabled = false; // Re-enable the button
+          });
+      });
+
+      {% if page %}
+        editor.setStyle("{{ page.css|safe }}"); // Apply the page CSS directly
+      {% endif %}
+    </script>
+  </body>
+</html>

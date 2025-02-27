@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Page Editor</title>
+    <script src="https://unpkg.com/grapesjs"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  </head>
+  <body>
+    <div id="gjs"></div>
+    <form
+      id="save-form"
+      action="{% if page %}{% url 'webbuilder:save_page' page.id %}{% else %}{% url 'webbuilder:create_page' %}{% endif %}"
+      method="POST"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="html" id="html" />
+      <input type="hidden" name="css" id="css" />
+      <button type="button" id="save-button">Save</button>
+    </form>
+    <script>
+      const editor = grapesjs.init({
+        container: "#gjs",
+        fromElement: true,
+        height: "100vh",
+      });
+
+      document.getElementById("save-button").addEventListener("click", () => {
+        const html = editor.getHtml();
+        const css = editor.getCss();
+        const csrfToken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
+        const formAction = document.getElementById("save-form").action;
+
+        fetch(formAction, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ html, css }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message) {
+              toastr.success(data.message); // Show success popup
+            } else if (data.error) {
+              toastr.error(data.error); // Show error popup
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            toastr.error("Failed to save the page. Please try again.");
+          });
+      });
+    </script>
+  </body>
+</html>

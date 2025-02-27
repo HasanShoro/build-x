@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Build-X | My Pages</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Global Styles */
+      body {
+        font-family: "Arial", sans-serif;
+        background: #f0f4f8;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #444;
+      }
+
+      .container {
+        margin-top: 30px;
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transition: all 0.3s ease;
+      }
+
+      .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: translateY(-2px);
+      }
+
+      /* Card Styles */
+      .card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-img-top {
+        height: 180px;
+        object-fit: cover;
+        border-bottom: 3px solid #ddd;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 15px;
+      }
+
+      .card-text {
+        font-size: 0.95rem;
+        color: #777;
+        margin-bottom: 20px;
+      }
+
+      .btn-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Layout Adjustments */
+      .d-flex.justify-content-between {
+        margin-bottom: 30px;
+      }
+
+      .col-md-4 {
+        flex: 0 0 32%;
+        max-width: 32%;
+      }
+
+      @media (max-width: 768px) {
+        .col-md-4 {
+          flex: 0 0 48%;
+          max-width: 48%;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .col-md-4 {
+          flex: 0 0 100%;
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <form id="csrf-form">{% csrf_token %}</form>
+    <div class="container">
+      <!-- Header Section -->
+      <div class="d-flex justify-content-between align-items-center">
+        <h1>My Pages</h1>
+        <a class="btn btn-primary" href="{% url 'webbuilder:create_page' %}"
+          >Create New Page</a
+        >
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="row g-4">
+        {% if pages %} {% for page in pages %}
+        <!-- Card 1 -->
+        <div class="col-md-4">
+          <div class="card">
+            <img
+              src="https://via.placeholder.com/500x300"
+              class="card-img-top"
+              alt="Image 1"
+            />
+            <div class="card-body">
+              <a
+                href="{% url 'webbuilder:edit_page' page.id %}"
+                class="text-decoration-none text-reset"
+              >
+                <h5 class="card-title">{{page.title}}</h5>
+                <p class="card-text">
+                  This is a small description of the card. It should briefly
+                  describe what the card is about.
+                </p>
+              </a>
+              <div class="btn-group">
+                <a
+                  class="btn btn-primary"
+                  href="{% url 'webbuilder:preview_page' page.id %}"
+                  target="_blank"
+                  >Preview</a
+                >
+                <button
+                  class="btn btn-danger"
+                  onclick="deletePage({{ page.id }})"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %} {% endif %}
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+
+<script>
+  function deletePage(id) {
+    // Get the CSRF token value from the form
+    const csrfToken = document.querySelector(
+      "[name=csrfmiddlewaretoken]"
+    ).value;
+
+    // Perform the fetch request to delete the page
+    fetch(`/page/delete/${id}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          alert(data.message); // Show a confirmation message
+          location.reload(); // Reload the page to update the list
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+</script>
